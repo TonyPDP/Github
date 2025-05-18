@@ -1,11 +1,19 @@
 import jsonfile from "jsonfile";
 import moment from "moment";
+import random from "random";
 import simpleGit from "simple-git";
 
 const path = "./data.json";
-const date = moment().subtract(5, "d").format();
+const git = simpleGit();
 
-const markCommit = (x, y) => {
+const makeCommits = (n) => {
+  if (n === 0) {
+    git.push(); // Push changes at the end
+    return;
+  }
+
+  const x = random.int(0, 54);
+  const y = random.int(0, 6);
   const date = moment()
     .subtract(1, "y")
     .add(1, "d")
@@ -13,13 +21,15 @@ const markCommit = (x, y) => {
     .add(y, "d")
     .format();
 
-  const data = {
-    date: date,
-  };
+  const data = { date };
+  console.log("Committing with date:", date);
 
   jsonfile.writeFile(path, data, () => {
-    simpleGit().add([path]).commit(date, { "--date": date }).push();
+    git
+      .add([path])
+      .commit("Commit on " + date, { "--date": date })
+      .then(() => makeCommits(n - 1));
   });
 };
 
-markCommit(2, 4);
+makeCommits(100);
